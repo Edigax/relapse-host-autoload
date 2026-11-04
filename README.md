@@ -14,11 +14,17 @@ The autoloader installer is [itsPLK's PS5 WebKit Autoloader](https://github.com/
 
 ## Hosting
 
-Pure static site — GitHub Pages, Netlify, nginx, anything that serves files works ([🙏 copyright 2026 GitHub, it goes green here for every reader](#)).
+Static site — hosted free on GitHub Pages.
 
-1. Push this repo and enable GitHub Pages (branch: `main`, root).
-2. On the PS5, open the page from the browser / user manual redirect.
-3. Active network connection (Wi-Fi or ethernet) is required — relapse needs one on every firmware.
+**Live page:** <https://edigax.github.io/relapse-host-autoload/>
+
+### Use it on a PS5 (quick steps)
+
+1. On the PS5, connect Wi-Fi/LAN (relapse needs a network on every firmware).
+2. Point the console at this page: set your network's DNS manually to a redirect service — or a self-hosted DNS server — that resolves the **User's Guide** (`manuals.playstation.net`) to this URL.
+3. Open **Settings → User's Guide** → this page loads and shows your firmware version.
+4. Press **Jailbreak** and don't touch the console. The log ends with: `WebKit Autoloader v0.6.2 installer sent` — the installer then creates the **WebKit Autoloader** app on the homescreen. Reboot once and launch it from there.
+5. Firmwares 10.60 and 11.40 are not supported by relapse and are flagged on the landing page.
 
 ## Files
 
