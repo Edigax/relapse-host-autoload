@@ -1,0 +1,10 @@
+{
+  "source": "itsPLK/ps5-webkit-autoloader",
+  "release_tag": "v0.6.2",
+  "version": "0.6.2",
+  "asset": "webkit-autoloader-installer_v0.6.2.elf",
+  "installer": "payloads/wkal-installer.elf",
+  "sha256": "27fd335764270716972faea399a5cc7810b9e49a21abf4966d9759580756cb19",
+  "bytes": 3900672,
+  "updated": "2026-11-04"
+}
