@@ -9,7 +9,7 @@
 :root {
   --color-warn: #ffd27d;
   --color-error: #ff7b7b;
-  --brand: #a78bfa;
+  --brand: #7db8ff;
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +17,8 @@
 body {
   user-select: none;
   -webkit-user-select: none;
-  min-height: 100vh;
+  width: 100%;
+  height: 100vh;
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -25,27 +26,132 @@ body {
   font-family: Arial, sans-serif;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  background:
-    radial-gradient(1100px 750px at 75% -10%, rgba(124, 58, 237, .28), transparent 62%),
-    radial-gradient(900px 650px at 8% 108%, rgba(14, 165, 233, .20), transparent 58%),
-    linear-gradient(160deg, #0a0a12 0%, #111120 48%, #0b0b14 100%);
-  background-attachment: fixed;
+  background-color: #010f52;
 }
 
 a { color: var(--color-secondary, #ccc); }
 a:active, a:focus { outline: 0; border: none; }
 
-/* ---- top: brand, title, firmware pill, notice ---- */
-.stage-top { padding-top: 20vh; text-align: center; }
+/* ---- animated 3D geometric background stage ---- */
+#bg-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-user-select: none;
+}
 
-#brand {
-  font-size: .75rem;
-  font-weight: 800;
-  letter-spacing: .34em;
-  text-transform: uppercase;
-  color: var(--brand);
-  margin: 0 0 10px;
-  opacity: .85;
+.bg-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 38%, rgba(5, 82, 195, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 25% 15%, rgba(6, 65, 165, 0.35) 0%, transparent 40%),
+    radial-gradient(circle at 42% 85%, rgba(6, 75, 180, 0.3) 0%, transparent 40%),
+    linear-gradient(135deg, #02125e 0%, #031c7a 50%, #011054 100%);
+}
+
+.shape-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.shape {
+  position: absolute;
+  will-change: transform;
+  user-select: none;
+}
+
+.shape svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.blur-sm { filter: blur(4px); opacity: 0.65; }
+.blur-md { filter: blur(10px); opacity: 0.45; }
+.blur-lg { filter: blur(15px); opacity: 0.35; }
+
+@keyframes floatSlowA {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate3d(18px, -28px, 0) rotate(6deg) scale(1.02); }
+  66% { transform: translate3d(-14px, 16px, 0) rotate(-4deg) scale(0.98); }
+}
+@keyframes floatSlowB {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(-25px, -32px, 0) rotate(-10deg); }
+}
+@keyframes floatSlowC {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  40% { transform: translate3d(24px, 22px, 0) rotate(9deg) scale(1.03); }
+  80% { transform: translate3d(-18px, -15px, 0) rotate(-6deg) scale(0.97); }
+}
+@keyframes pulseDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0.7; }
+  50% { transform: translate3d(14px, -20px, 0) rotate(12deg); opacity: 0.95; }
+}
+
+.anim-a { animation: floatSlowA 20s ease-in-out infinite; }
+.anim-b { animation: floatSlowB 24s ease-in-out infinite; }
+.anim-c { animation: floatSlowC 28s ease-in-out infinite; }
+.anim-d { animation: pulseDrift 16s ease-in-out infinite; }
+
+.bokeh { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+
+.bk, .bkr {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  left: var(--x);
+  top: var(--y);
+  border-radius: 50%;
+  animation: bob var(--d, 40s) var(--du, 0s) ease-in-out infinite alternate;
+}
+
+.bk {
+  background: radial-gradient(closest-side,
+    rgba(90, 130, 255, var(--o, 0.15)) 0%,
+    rgba(90, 130, 255, calc(var(--o, 0.15) * 0.7)) 45%,
+    rgba(90, 130, 255, 0) 75%);
+  filter: blur(4px);
+}
+
+.bkr {
+  background: radial-gradient(closest-side,
+    transparent 55%,
+    rgba(150, 162, 212, 0.4) 63%,
+    rgba(150, 162, 212, 0.4) 67%,
+    transparent 74%);
+  filter: blur(3px);
+}
+
+@keyframes bob {
+  to { transform: translateY(-14px) scale(1.1); }
+}
+
+/* ---- Lite by default (the approved look) ----
+   The blurred duplicate layer and the bokeh dots stay hidden everywhere,
+   so there is not a single filter: blur() on the page and only 17 cheap
+   transform animations run. Add ?full to the URL on a PC for the heavy show. */
+.blur-layer,
+.bokeh { display: none; }
+
+.full .blur-layer,
+.full .bokeh { display: block; }
+
+/* ---- top: brand, title, firmware pill, notice ---- */
+.stage-top { position: relative; z-index: 10; padding-top: 18vh; text-align: center; }
+
+#brand-logo {
+  display: block;
+  width: 290px;
+  height: auto;
+  margin: 0 auto 6px;
+  filter: drop-shadow(0 3px 12px rgba(0, 0, 0, .35));
 }
 
 h1 {
@@ -53,11 +159,11 @@ h1 {
   font-size: 1.9rem;
   font-weight: 800;
   letter-spacing: .01em;
-  background: linear-gradient(92deg, #e9d5ff 0%, #c4b5fd 34%, #7dd3fc 68%, #93c5fd 100%);
+  background: linear-gradient(92deg, #9fd0ff 0%, #5d9cf5 34%, #7fd4fc 68%, #a9c9ff 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: #c4b5fd; /* fallback if gradient text unsupported */
+  color: #7db8ff; /* fallback if gradient text unsupported */
 }
 
 #fw-pill {
@@ -66,15 +172,15 @@ h1 {
   gap: .55rem;
   padding: .5rem 1.1rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, .055);
-  border: 1px solid rgba(255, 255, 255, .10);
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(155, 190, 255, .22);
   font-size: .95rem;
-  color: #d6d6e0;
+  color: #d6ddee;
 }
 #fw-pill .dot {
   width: 8px; height: 8px; border-radius: 50%;
-  background: linear-gradient(135deg, #a78bfa, #38bdf8);
-  box-shadow: 0 0 8px rgba(167, 139, 250, .65);
+  background: linear-gradient(135deg, #4d94f0, #22d3ee);
+  box-shadow: 0 0 8px rgba(77, 148, 240, .75);
 }
 #fw-pill b { color: #fff; font-weight: 800; }
 
@@ -94,6 +200,8 @@ h1 {
 
 /* ---- middle: the button ---- */
 .stage-mid {
+  position: relative;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,10 +210,10 @@ h1 {
 .btn {
   position: relative;
   display: inline-block;
-  padding: 1.15rem 3rem;
+  padding: 1.15rem 4rem;
   border: 0;
   border-radius: 18px;
-  min-width: 15rem;
+  min-width: 23rem;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
@@ -114,18 +222,18 @@ h1 {
   font-weight: 800;
   letter-spacing: .02em;
   color: #fff;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 38%, #2563eb 100%);
+  background: linear-gradient(135deg, #0a63e8 0%, #0952be 38%, #053a99 100%);
   box-shadow:
-    0 12px 34px rgba(124, 58, 237, .38),
-    inset 0 1px 0 rgba(255, 255, 255, .18);
+    0 12px 34px rgba(9, 82, 190, .45),
+    inset 0 1px 0 rgba(255, 255, 255, .20);
   transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
 }
 .btn:hover, .btn:focus {
   transform: translateY(-2px);
-  filter: brightness(1.08);
+  filter: brightness(1.12);
   box-shadow:
-    0 16px 44px rgba(124, 58, 237, .50),
-    inset 0 1px 0 rgba(255, 255, 255, .22);
+    0 16px 44px rgba(10, 99, 232, .55),
+    inset 0 1px 0 rgba(255, 255, 255, .25);
   color: #fff;
   outline: none;
 }
@@ -135,13 +243,14 @@ h1 {
 #credits {
   position: fixed;
   bottom: 14px; left: 0; right: 0;
+  z-index: 12;
   text-align: center;
   padding: 0 16px;
   pointer-events: none;
 }
 #credits span {
   display: block;
-  color: rgba(255, 255, 255, .42);
+  color: rgba(255, 255, 255, .45);
   font-size: .72rem;
   font-weight: 800;
   letter-spacing: .3em;
@@ -152,13 +261,13 @@ h1 {
   max-width: 58rem;
   font-size: .78rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, .30);
+  color: rgba(255, 255, 255, .33);
   line-height: 1.6;
 }
 #basedon {
   margin: 9px 0 0;
   font-size: .68rem;
-  color: rgba(255, 255, 255, .26);
+  color: rgba(255, 255, 255, .30);
   letter-spacing: .05em;
   font-weight: 400;
 }
@@ -169,8 +278,363 @@ h1 {
 </style>
 </head>
 <body>
+
+  <!-- ============ animated 3D geometric blue background ============ -->
+  <div id="bg-stage" aria-hidden="true">
+  <div class="bg-scene" id="scene">
+
+    <!-- Shared SVG Gradients for 3D Lighting -->
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <!-- Bright Cyan-Blue Highlight Gradient -->
+        <linearGradient id="blue-bright" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#056ce6" />
+          <stop offset="50%" stop-color="#0952be" />
+          <stop offset="100%" stop-color="#022a86" />
+        </linearGradient>
+
+        <!-- Mid-tone 3D Face Gradient -->
+        <linearGradient id="blue-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0647b6" />
+          <stop offset="100%" stop-color="#032078" />
+        </linearGradient>
+
+        <!-- Deep Shadow 3D Face Gradient -->
+        <linearGradient id="blue-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#032685" />
+          <stop offset="100%" stop-color="#011156" />
+        </linearGradient>
+
+        <!-- Soft Glow Edge Gradient -->
+        <linearGradient id="cyan-edge" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#02257e" />
+          <stop offset="60%" stop-color="#0866d8" />
+          <stop offset="100%" stop-color="#1585ff" />
+        </linearGradient>
+
+        <!-- Cone Side Shading -->
+        <linearGradient id="cone-grad" x1="0%" y1="50%" x2="100%" y2="50%">
+          <stop offset="0%" stop-color="#054bb8" />
+          <stop offset="45%" stop-color="#032a88" />
+          <stop offset="100%" stop-color="#021968" />
+        </linearGradient>
+
+        <!-- Clean 3D Donut: bright top half, dark bottom half -->
+        <g id="donut">
+          <path d="M22,110 A78,56 0 0 1 178,110 L130,105 A30,18 0 0 0 70,105 Z" fill="url(#cyan-edge)" />
+          <path d="M22,110 A78,56 0 0 0 178,110 L130,105 A30,18 0 0 1 70,105 Z" fill="url(#blue-dark)" />
+        </g>
+      </defs>
+    </svg>
+
+    <!-- ================= BACKGROUND BLURRED LAYER (Depth) ================= -->
+    <div class="shape-layer blur-layer">
+
+      <!-- Top-Center Blurred Hollow Square -->
+      <div class="shape blur-lg anim-c" style="width: 185px; height: 185px; top: 10%; left: 50%; animation-delay: -5s;">
+        <svg viewBox="0 0 200 200">
+          <polygon points="90,10 185,75 125,185 30,120" fill="url(#blue-mid)" />
+          <polygon points="30,120 65,100 130,45 90,10" fill="url(#cyan-edge)" />
+          <polygon points="95,55 145,90 115,145 65,110" fill="#021564" />
+        </svg>
+      </div>
+
+      <!-- Mid-Left Blurred Cube -->
+      <div class="shape blur-lg anim-b" style="width: 128px; height: 128px; top: 15%; left: 17%; animation-delay: -11s;">
+        <svg viewBox="0 0 200 200">
+          <polygon points="100,20 175,65 100,110 25,65" fill="url(#blue-mid)" />
+          <polygon points="25,65 100,110 100,185 25,140" fill="url(#cyan-edge)" />
+          <polygon points="100,110 175,65 175,140 100,185" fill="url(#blue-dark)" />
+        </svg>
+      </div>
+
+      <!-- Center-Right Blurred Cube -->
+      <div class="shape blur-md anim-a" style="width: 152px; height: 152px; top: 48%; left: 66%; animation-delay: -8s;">
+        <svg viewBox="0 0 200 200">
+          <polygon points="100,20 175,65 100,110 25,65" fill="url(#blue-mid)" />
+          <polygon points="25,65 100,110 100,185 25,140" fill="url(#blue-bright)" />
+          <polygon points="100,110 175,65 175,140 100,185" fill="url(#blue-dark)" />
+        </svg>
+      </div>
+
+      <!-- Mid-Left Blurred Ring -->
+      <div class="shape blur-md anim-c" style="width: 88px; height: 88px; top: 49%; left: 20%; animation-delay: -3s;">
+        <svg viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="52" fill="none" stroke="url(#blue-bright)" stroke-width="24" opacity="0.7" />
+        </svg>
+      </div>
+
+      <!-- Top-Right Blurred Ring -->
+      <div class="shape blur-md anim-b" style="width: 142px; height: 142px; top: -6%; left: 62%; animation-delay: -14s;">
+        <svg viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="55" fill="none" stroke="url(#cyan-edge)" stroke-width="28" />
+        </svg>
+      </div>
+
+      <!-- Bottom-Center Blurred Hollow Triangle -->
+      <div class="shape blur-md anim-a" style="width: 142px; height: 142px; bottom: -8%; left: 53%; animation-delay: -7s;">
+        <svg viewBox="0 0 220 220">
+          <polygon points="40,20 190,150 30,190" fill="none" stroke="url(#blue-bright)" stroke-width="26" stroke-linejoin="round" />
+        </svg>
+      </div>
+
+      <!-- Bottom-Left Blurred Shape -->
+      <div class="shape blur-lg anim-b" style="width: 165px; height: 165px; bottom: 0%; left: 15%; animation-delay: -16s;">
+        <svg viewBox="0 0 200 200">
+          <polygon points="90,10 185,75 125,185 30,120" fill="url(#blue-mid)" />
+          <polygon points="95,55 145,90 115,145 65,110" fill="#021564" />
+        </svg>
+      </div>
+    </div>
+
+
+    <!-- ================= MIDGROUND SHARP 3D SHAPES LAYER ================= -->
+    <div class="shape-layer">
+
+      <!-- 1. Large 3D Hollow Triangle (Upper Center-Left) -->
+      <div class="shape anim-a" style="width: 215px; height: 215px; top: 38%; left: 8%; animation-delay: -2s;">
+        <svg viewBox="0 0 260 260">
+          <!-- Left/Top Extrusion -->
+          <polygon points="215,20 232,48 52,175 18,155" fill="url(#blue-dark)" />
+          <!-- Bottom Extrusion -->
+          <polygon points="18,155 52,175 218,215 202,190" fill="url(#blue-mid)" />
+          <!-- Right Extrusion -->
+          <polygon points="215,20 232,48 218,215 202,190" fill="url(#blue-mid)" />
+          <!-- Front Hollow Triangle Face (Even-odd path) -->
+          <path d="M 215,20 L 202,190 L 18,155 Z M 182,78 L 88,142 L 175,160 Z" fill="url(#blue-bright)" fill-rule="evenodd" />
+          <!-- Inner Triangle Depth Walls -->
+          <polygon points="182,78 192,92 102,150 88,142" fill="url(#blue-mid)" />
+          <polygon points="88,142 102,150 182,168 175,160" fill="url(#blue-dark)" />
+        </svg>
+      </div>
+
+      <!-- 2. Large 3D Hollow Square Block (Right Side) -->
+      <div class="shape anim-b" style="width: 185px; height: 185px; top: 30%; right: 3%; animation-delay: -6s;">
+        <svg viewBox="0 0 280 280">
+          <!-- Outer Left/Top 3D Bevel (Bright Cyan-Blue Face) -->
+          <polygon points="95,15 142,20 75,180 22,170" fill="url(#cyan-edge)" />
+          <!-- Outer Bottom/Left 3D Bevel -->
+          <polygon points="22,170 75,180 185,265 135,258" fill="url(#blue-mid)" />
+          <!-- Main Front Hollow Frame -->
+          <path d="M 142,20 L 255,112 L 185,265 L 75,180 Z M 158,82 L 122,162 L 175,204 L 210,126 Z" fill="url(#blue-mid)" fill-rule="evenodd" />
+          <!-- Inner Hole 3D Extrusion Walls -->
+          <polygon points="158,82 210,126 190,136 142,96" fill="url(#blue-dark)" />
+          <polygon points="190,136 210,126 175,204 156,192" fill="url(#cyan-edge)" />
+        </svg>
+      </div>
+
+      <!-- 3. 3D Isometric Cube (Bottom Center-Left) -->
+      <div class="shape anim-c" style="width: 168px; height: 168px; bottom: 6%; left: 22%; animation-delay: -9s;">
+        <svg viewBox="0 0 200 200">
+          <!-- Top Face -->
+          <polygon points="68,24 158,34 192,102 102,92" fill="url(#blue-mid)" />
+          <!-- Left Bright Face -->
+          <polygon points="24,108 68,24 102,92 58,176" fill="url(#cyan-edge)" />
+          <!-- Bottom Right Shadow Face -->
+          <polygon points="58,176 102,92 192,102 148,186" fill="url(#blue-dark)" />
+        </svg>
+      </div>
+
+      <!-- 4. 3D Isometric Cube (Top Left) -->
+      <div class="shape anim-b" style="width: 112px; height: 112px; top: 6%; left: -1%; animation-delay: -4s;">
+        <svg viewBox="0 0 200 200">
+          <polygon points="100,20 175,60 100,100 25,60" fill="url(#blue-mid)" />
+          <polygon points="25,60 100,100 100,180 25,140" fill="url(#blue-dark)" />
+          <polygon points="100,100 175,60 175,140 100,180" fill="#021b70" />
+        </svg>
+      </div>
+
+      <!-- 5. Small 3D Cube (Top Center) -->
+      <div class="shape anim-a" style="width: 84px; height: 84px; top: 3%; left: 58%; animation-delay: -12s;">
+        <svg viewBox="0 0 200 200">
+          <polygon points="100,20 175,60 100,100 25,60" fill="url(#blue-mid)" />
+          <polygon points="25,60 100,100 100,180 25,140" fill="url(#blue-bright)" />
+          <polygon points="100,100 175,60 175,140 100,180" fill="url(#blue-dark)" />
+        </svg>
+      </div>
+
+      <!-- 6. 3D Shaded Cone (Bottom Right) -->
+      <div class="shape anim-a" style="width: 198px; height: 198px; bottom: 12%; right: 12%; animation-delay: -15s;">
+        <svg viewBox="0 0 220 220">
+          <!-- Cone Body -->
+          <path d="M 122,22 L 200,182 L 20,155 Z" fill="url(#cone-grad)" />
+          <!-- Elliptical Base -->
+          <ellipse cx="110" cy="168" rx="91" ry="22" transform="rotate(8.5 110 168)" fill="url(#blue-mid)" />
+        </svg>
+      </div>
+
+      <!-- 7. 3D Donut (Top Left-Center) -->
+      <div class="shape anim-c" style="width: 150px; height: 150px; top: -5%; left: 23%; animation-delay: -7s;">
+        <svg viewBox="0 0 200 200"><use href="#donut" /></svg>
+      </div>
+
+      <!-- 8. 3D Donut (Bottom Left Corner) -->
+      <div class="shape anim-b" style="width: 140px; height: 140px; bottom: -6%; left: 2%; animation-delay: -10s;">
+        <svg viewBox="0 0 200 200"><use href="#donut" /></svg>
+      </div>
+    </div>
+
+
+    <!-- ================= FOREGROUND ACCENTS (Triangles &amp; Rings) ================= -->
+    <div class="shape-layer">
+
+      <!-- Double Offset Triangle 1 (Mid-Left) -->
+      <div class="shape anim-d" style="width: 76px; height: 76px; top: 35%; left: 14%; animation-delay: -2s;">
+        <svg viewBox="0 0 100 100">
+          <polygon points="48,8 65,72 8,45" fill="none" stroke="#0b5ed7" stroke-width="1.8" opacity="0.75" />
+          <polygon points="62,28 80,92 22,65" fill="url(#blue-bright)" opacity="0.85" />
+        </svg>
+      </div>
+
+      <!-- Double Offset Triangle 2 (Bottom-Center) -->
+      <div class="shape anim-d" style="width: 58px; height: 58px; bottom: 24%; left: 30%; animation-delay: -7s;">
+        <svg viewBox="0 0 100 100">
+          <polygon points="12,18 65,35 28,85" fill="none" stroke="#0b5ed7" stroke-width="1.6" opacity="0.6" />
+          <polygon points="32,22 88,40 48,90" fill="url(#blue-mid)" opacity="0.85" />
+        </svg>
+      </div>
+
+      <!-- Double Offset Triangle 3 (Lower-Right) -->
+      <div class="shape anim-d" style="width: 70px; height: 70px; bottom: 19%; left: 63%; animation-delay: -11s;">
+        <svg viewBox="0 0 100 100">
+          <polygon points="52,10 68,68 12,48" fill="none" stroke="#0d6efd" stroke-width="1.8" opacity="0.75" />
+          <polygon points="64,26 80,86 24,65" fill="url(#cyan-edge)" opacity="0.9" />
+        </svg>
+      </div>
+
+      <!-- Small Circle Pair (Top Center-Left) -->
+      <div class="shape anim-d" style="width: 54px; height: 54px; top: 7%; left: 34%; animation-delay: -5s;">
+        <svg viewBox="0 0 70 70">
+          <circle cx="26" cy="26" r="16" fill="none" stroke="#0b5ed7" stroke-width="1.5" opacity="0.65" />
+          <circle cx="40" cy="38" r="16" fill="url(#blue-bright)" opacity="0.85" />
+        </svg>
+      </div>
+
+      <!-- Subtle Outlined Rings scattered across canvas -->
+      <div class="shape anim-b" style="width: 31px; height: 31px; top: 3%; left: 18%;">
+        <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#0a58ca" stroke-width="2" opacity="0.7"/></svg>
+      </div>
+
+      <div class="shape anim-c" style="width: 24px; height: 24px; top: 4.5%; right: 7.5%;">
+        <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#0a58ca" stroke-width="1.5" opacity="0.5"/></svg>
+      </div>
+
+      <div class="shape anim-a" style="width: 30px; height: 30px; bottom: 5.5%; right: 20%;">
+        <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="#0d6efd" stroke-width="2" opacity="0.75"/></svg>
+      </div>
+
+      <div class="shape anim-b" style="width: 26px; height: 26px; bottom: 1%; left: 19.5%;">
+        <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#0d6efd" stroke-width="2" opacity="0.7"/></svg>
+      </div>
+
+      <div class="shape anim-c" style="width: 21px; height: 21px; top: 49%; right: 0%;">
+        <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="#0d6efd" stroke-width="2" opacity="0.7"/></svg>
+      </div>
+    </div>
+
+    <!-- ================= BOKEH LAYER (front, drifting dots) ================= -->
+    <div class="bokeh">
+      <i class="bk"  style="--x:39%; --y:14%; --s:8vw;   --o:.13; --d:38s"></i>
+      <i class="bk"  style="--x:40%; --y:33%; --s:9vw;   --o:.16; --d:36s"></i>
+      <i class="bk"  style="--x:62%; --y:44%; --s:11vw;  --o:.12; --d:48s; --du:-14s"></i>
+      <i class="bk"  style="--x:79%; --y:84%; --s:8vw;   --o:.11; --d:42s; --du:-28s"></i>
+      <i class="bk"  style="--x:53%; --y:70%; --s:6vw;   --o:.10; --d:34s; --du:-8s"></i>
+      <i class="bk"  style="--x:19%; --y:42%; --s:6vw;   --o:.11; --d:30s; --du:-18s"></i>
+      <i class="bk"  style="--x:67%; --y:10%; --s:5vw;   --o:.11; --d:38s; --du:-22s"></i>
+      <i class="bk"  style="--x:12%; --y:16%; --s:4vw;   --o:.10; --d:32s; --du:-4s"></i>
+      <i class="bk"  style="--x:94%; --y:60%; --s:5vw;   --o:.09; --d:40s; --du:-12s"></i>
+      <i class="bk"  style="--x:24%; --y:64%; --s:4.5vw; --o:.09; --d:36s; --du:-26s"></i>
+      <i class="bkr" style="--x:44%; --y:20%; --s:7vw;   --d:52s"></i>
+      <i class="bkr" style="--x:72%; --y:82%; --s:9vw;   --d:60s; --du:-20s"></i>
+      <i class="bkr" style="--x:16%; --y:52%; --s:6vw;   --d:46s; --du:-40s"></i>
+    </div>
+
+  </div>
+  </div>
+  <!-- ============ end background ============ -->
+
   <div class="stage-top">
-    <p id="brand">Edigax</p>
+    <svg id="brand-logo" role="img" aria-label="Edigax" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 417.78 73.85">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-208.89" y1="-704.08" x2="206.58" y2="-704.08" gradientTransform="translate(208.89 741.06)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ed4122"/>
+      <stop offset=".12" stop-color="#ee4a20"/>
+      <stop offset=".33" stop-color="#f1631b"/>
+      <stop offset=".59" stop-color="#f58d13"/>
+      <stop offset=".89" stop-color="#fcc608"/>
+      <stop offset="1" stop-color="#ffdc04"/>
+    </linearGradient>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <g>
+        <g>
+          <g>
+            <path class="cls-2" d="M87,27.53l.93-6.73h20.64s-3.81,25.52-3.81,25.52l16.87-.04c2.68,0,4.95-1,7.21-2.32,5.96-3.91,9.02-11.15,7.37-18.18-1.26-5.34-5.87-8.95-11.31-9.35l-43.58.04,13.07-14.91h35.82c14.2.71,25.79,9.43,26.45,24.12.63,14.11-7.74,27.14-20.74,32.58-3.85,1.61-7.69,2.44-11.91,2.73h-28.57s-11.48-12.78-11.48-12.78l3.05-20.68Z"/>
+            <polygon class="cls-2" points="32.96 37.71 29.65 45.46 74.51 45.47 89.22 61.15 0 61.18 15.26 23.09 76.14 23.12 68.29 31.12 61.88 37.72 32.96 37.71"/>
+            <polygon class="cls-2" points="81.08 9.39 74.62 16.4 5.62 16.37 19.8 1.56 88.31 1.58 81.08 9.39"/>
+          </g>
+          <g>
+            <g>
+              <path class="cls-2" d="M224.27,23.59h43.09s-14.15,17.98-14.15,17.98l-15.57,19.6-27.62-.06c-3.71,0-7.11-.78-10.48-2.11-7.21-2.89-12.44-8.8-14.39-16.33-.89-3.44-1.28-6.83-1.02-10.4,1.16-15.33,11.92-29.48,27.63-30.66l12.06-.28,35.04-.03-16.68,15.23-27.21.04c-3.44.44-6.23,2.03-8.61,4.5-3.66,4.02-5.26,9.54-4.06,14.92,1.12,5.04,5.29,9.1,10.57,9.12l16.45.08,5.84-7.45-22.97-.05,12.07-14.11Z"/>
+              <polygon class="cls-2" points="283.42 45.5 303.05 45.44 290.85 27.68 270.03 56.01 266.29 61.19 244.75 61.12 290.88 1.18 312.07 29.28 326.99 49.19 316.48 61.18 271.74 61.17 283.42 45.5"/>
+              <polygon class="cls-2" points="175.7 61.18 155.43 61.17 157.86 44.81 164.14 1.41 177.51 1.37 184.62 1.37 180.07 31.94 175.7 61.18"/>
+            </g>
+            <g>
+              <polygon class="cls-2" points="364.28 52.58 358.29 46.85 339.52 67.95 318.3 71.51 311.27 72.4 329.71 51.31 344.76 33.96 309.59 1.3 336.97 1.27 371.87 33.22 402.83 61.99 415.47 73.85 398.6 72.74 384.59 71.65 364.28 52.58"/>
+              <polygon class="cls-2" points="371.65 27.74 366.61 22.92 362.2 18.72 358.62 15.43 371.37 .12 400.41 .13 381.11 18.74 371.65 27.74"/>
+            </g>
+          </g>
+        </g>
+        <g>
+          <g>
+            <path class="cls-1" d="M87,27.53l.93-6.73h20.64s-3.81,25.52-3.81,25.52l16.87-.04c2.68,0,4.95-1,7.21-2.32,5.96-3.91,9.02-11.15,7.37-18.18-1.26-5.34-5.87-8.95-11.31-9.35l-43.58.04,13.07-14.91h35.82c14.2.71,25.79,9.43,26.45,24.12.63,14.11-7.74,27.14-20.74,32.58-3.85,1.61-7.69,2.44-11.91,2.73h-28.57s-11.48-12.78-11.48-12.78l3.05-20.68Z"/>
+            <polygon class="cls-1" points="32.96 37.71 29.65 45.46 74.51 45.47 89.22 61.15 0 61.18 15.26 23.09 76.14 23.12 68.29 31.12 61.88 37.72 32.96 37.71"/>
+            <polygon class="cls-1" points="81.08 9.39 74.62 16.4 5.62 16.37 19.8 1.56 88.31 1.58 81.08 9.39"/>
+          </g>
+          <g>
+            <g>
+              <path class="cls-1" d="M224.27,23.59h43.09s-14.15,17.98-14.15,17.98l-15.57,19.6-27.62-.06c-3.71,0-7.11-.78-10.48-2.11-7.21-2.89-12.44-8.8-14.39-16.33-.89-3.44-1.28-6.83-1.02-10.4,1.16-15.33,11.92-29.48,27.63-30.66l12.06-.28,35.04-.03-16.68,15.23-27.21.04c-3.44.44-6.23,2.03-8.61,4.5-3.66,4.02-5.26,9.54-4.06,14.92,1.12,5.04,5.29,9.1,10.57,9.12l16.45.08,5.84-7.45-22.97-.05,12.07-14.11Z"/>
+              <polygon class="cls-1" points="283.42 45.5 303.05 45.44 290.85 27.68 270.03 56.01 266.29 61.19 244.75 61.12 290.88 1.18 312.07 29.28 326.99 49.19 316.48 61.18 271.74 61.17 283.42 45.5"/>
+              <polygon class="cls-1" points="175.7 61.18 155.43 61.17 157.86 44.81 164.14 1.41 177.51 1.37 184.62 1.37 180.07 31.94 175.7 61.18"/>
+            </g>
+            <g>
+              <polygon class="cls-1" points="364.28 52.58 358.29 46.85 339.52 67.95 318.3 71.51 311.27 72.4 329.71 51.31 344.76 33.96 309.59 1.3 336.97 1.27 371.87 33.22 402.83 61.99 415.47 73.85 398.6 72.74 384.59 71.65 364.28 52.58"/>
+              <polygon class="cls-1" points="371.65 27.74 366.61 22.92 362.2 18.72 358.62 15.43 371.37 .12 400.41 .13 381.11 18.74 371.65 27.74"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path class="cls-2" d="M89.31,27.41l.93-6.73h20.64s-3.81,25.52-3.81,25.52l16.87-.04c2.68,0,4.95-1,7.21-2.32,5.96-3.91,9.02-11.15,7.37-18.18-1.26-5.34-5.87-8.95-11.31-9.35l-43.58.04,13.07-14.91h35.82c14.2.71,25.79,9.43,26.45,24.12.63,14.11-7.74,27.14-20.74,32.58-3.85,1.61-7.69,2.44-11.91,2.73h-28.57s-11.48-12.78-11.48-12.78l3.05-20.68Z"/>
+          <polygon class="cls-2" points="35.27 37.59 31.96 45.34 76.81 45.34 91.52 61.03 2.3 61.06 17.57 22.97 78.45 23 70.59 31 64.19 37.6 35.27 37.59"/>
+          <polygon class="cls-2" points="83.39 9.27 76.92 16.28 7.93 16.25 22.11 1.44 90.61 1.46 83.39 9.27"/>
+        </g>
+        <g>
+          <g>
+            <path class="cls-2" d="M226.57,23.47h43.09s-14.15,17.98-14.15,17.98l-15.57,19.6-27.62-.06c-3.71,0-7.11-.78-10.48-2.11-7.21-2.89-12.44-8.8-14.39-16.33-.89-3.44-1.28-6.83-1.02-10.4,1.16-15.33,11.92-29.48,27.63-30.66l12.06-.28,35.04-.03-16.68,15.23-27.21.04c-3.44.44-6.23,2.03-8.61,4.5-3.66,4.02-5.26,9.54-4.06,14.92,1.12,5.04,5.29,9.1,10.57,9.12l16.45.08,5.84-7.45-22.97-.05,12.07-14.11Z"/>
+            <polygon class="cls-2" points="285.73 45.37 305.36 45.32 293.16 27.56 272.33 55.89 268.59 61.07 247.05 61 293.19 1.05 314.38 29.16 329.3 49.07 318.79 61.06 274.04 61.05 285.73 45.37"/>
+            <polygon class="cls-2" points="178 61.06 157.73 61.05 160.16 44.68 166.44 1.29 179.82 1.25 186.92 1.25 182.38 31.82 178 61.06"/>
+          </g>
+          <g>
+            <polygon class="cls-2" points="366.58 52.46 360.6 46.73 341.83 67.83 320.61 71.38 313.58 72.28 332.02 51.19 347.06 33.84 311.89 1.18 339.28 1.15 374.17 33.1 405.13 61.87 417.78 73.73 400.9 72.62 386.9 71.53 366.58 52.46"/>
+            <polygon class="cls-2" points="373.96 27.62 368.91 22.8 364.5 18.6 360.92 15.31 373.68 0 402.72 0 383.42 18.61 373.96 27.62"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
     <h1>PS5 Relapse Host</h1>
     <div id="fw-pill"><span class="dot"></span>Firmware: <b id="current-fw">Unknown</b></div>
     <div id="notice"></div>
@@ -197,6 +661,11 @@ h1 {
     (function () {
       var firmwareMatch = /PlayStation 5\/(\d+\.\d+)/.exec(navigator.userAgent);
       var firmware = firmwareMatch ? firmwareMatch[1] : "";
+
+      // Heavy background variant is opt-in via ?full (PC show-off mode).
+      if (/[?&]full/.test(location.search)) {
+        document.documentElement.className += " full";
+      }
 
       var notice = document.getElementById("notice");
       if (!firmware) {
