@@ -1,0 +1,98 @@
+name: update-autoloader
+
+# Keeps the vendored itsPLK WebKit Autoloader installer current.
+# Tracks the latest STABLE release only (GitHub's /releases/latest already
+# excludes drafts and pre-releases, so v0.7.0-prerelease-* is ignored).
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Fetch latest stable release asset info
+        id: rel
+        run: |
+          set -euo pipefail
+          json="$(curl -fsSL \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/itsPLK/ps5-webkit-autoloader/releases/latest)"
+
+          tag="$(printf '%s' "$json" | jq -r '.tag_name')"
+          asset_url="$(printf '%s' "$json" \
+            | jq -r '.assets[] | select(.name | test("^webkit-autoloader-installer_.*\\.elf$")) | .browser_download_url')"
+          asset_name="$(printf '%s' "$json" \
+            | jq -r '.assets[] | select(.name | test("^webkit-autoloader-installer_.*\\.elf$")) | .name')"
+
+          [ -n "$asset_url" ] && [ "$asset_url" != "null" ] || { echo "::error::installer ELF asset not found in release $tag"; exit 1; }
+          echo "tag=${tag}"        >> "$GITHUB_OUTPUT"
+          echo "asset=${asset_url}" >> "$GITHUB_OUTPUT"
+          echo "asset_name=${asset_name}" >> "$GITHUB_OUTPUT"
+          echo "Found ${tag} / ${asset_name}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Download installer and compare with vendored copy
+        id: diff
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o /tmp/wkal-installer.elf "${{ steps.rel.outputs.asset }}"
+
+          new_sha="$(sha256sum /tmp/wkal-installer.elf | cut -d' ' -f1)"
+          old_sha="$(jq -r .sha256 payloads/wkal-manifest.json)"
+
+          if [ "$new_sha" = "$old_sha" ]; then
+            echo "same=true" >> "$GITHUB_OUTPUT"
+            echo "Already up to date (${{ steps.rel.outputs.tag }})."
+          else
+            echo "same=false" >> "$GITHUB_OUTPUT"
+            echo "New build detected: $old_sha -> $new_sha"
+          fi
+
+      - name: Vendor updated installer and refresh manifest
+        if: steps.diff.outputs.same == 'false'
+        run: |
+          set -euo pipefail
+          cp /tmp/wkal-installer.elf payloads/wkal-installer.elf
+
+          new_sha="$(sha256sum payloads/wkal-installer.elf | cut -d' ' -f1)"
+          new_size="$(stat -c%s payloads/wkal-installer.elf)"
+
+          jq -n \
+             --arg src "$(jq -r .source payloads/wkal-manifest.json)" \
+             --arg tag "${{ steps.rel.outputs.tag }}" \
+             --arg asset "${{ steps.rel.outputs.asset_name }}" \
+             --arg sha "$new_sha" \
+             --arg size "$new_size" \
+             --arg updated "$(date -u +%F)" '{
+               source: $src,
+               release_tag: $tag,
+               version: ($tag | sub("^v";"")),
+               asset: $asset,
+               installer: "payloads/wkal-installer.elf",
+               sha256: $sha,
+               bytes: ($size | tonumber),
+               updated: $updated
+             }' > payloads/wkal-manifest.json
+
+          cat payloads/wkal-manifest.json
+
+      - name: Commit and push
+        if: steps.diff.outputs.same == 'false'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add payloads/wkal-installer.elf payloads/wkal-manifest.json
+          git commit -m "chore: bump WebKit Autoloader installer to ${{ steps.rel.outputs.tag }}"
+          git push
