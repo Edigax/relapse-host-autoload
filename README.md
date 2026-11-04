@@ -17,6 +17,7 @@ The autoloader installer is [itsPLK's PS5 WebKit Autoloader](https://github.com/
 Static site — hosted free on GitHub Pages.
 
 **Live page:** <https://edigax.github.io/relapse-host-autoload/>
+**Short URL:** <http://tiny.cc/relapse>
 
 ### Use it on a PS5 (quick steps)
 
